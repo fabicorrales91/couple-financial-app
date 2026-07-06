@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Warmth & Wealth (ajustado a mockup UsShare): coral/terracota + verde bosque sobre fondo rosado, mas claro */
+    --background: 11 55% 97%;
+    --foreground: 5 19% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 5 19% 12%;
+    --primary: 8 55% 49%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 144 27% 33%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 9 45% 93%;
+    --muted-foreground: 8 20% 35%;
+    --accent: 133 35% 90%;
+    --accent-foreground: 144 27% 33%;
+    --destructive: 8 55% 49%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 9 30% 87%;
+    --input: 9 30% 87%;
+    --ring: 8 55% 49%;
+    --radius: 1.25rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

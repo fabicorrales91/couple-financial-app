@@ -1,0 +1,17 @@
+name: app_financiera_db
+services:
+  db:
+    container_name: postgres_db
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: app_financiera
+      POSTGRES_PASSWORD: app_financiera
+      POSTGRES_DB: app_financiera
+    ports:
+      - "5432:5432"
+    volumes:
+      - app_financiera_db:/var/lib/postgresql/data
+
+volumes:
+  app_financiera_db:

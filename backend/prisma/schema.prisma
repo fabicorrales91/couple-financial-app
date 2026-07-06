@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum GlobalRole {
+  admin
+  user
+}
+
+enum AccountType {
+  personal
+  group
+}
+
+enum GroupRole {
+  admin
+  member
+}
+
+enum ContactStatus {
+  pending
+  accepted
+}
+
+enum InviteType {
+  contact
+  group
+}
+
+enum TransactionType {
+  gasto
+  ingreso
+  transferencia
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  roleGlobal   GlobalRole @default(user) @map("role_global")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  accounts           Account[]          @relation("AccountOwner")
+  groupMemberships   GroupMembership[]
+  categories         Category[]
+  createdInvites     Invite[]           @relation("InviteCreator")
+  redeemedInvites    Invite[]           @relation("InviteRedeemer")
+  contactsRequested  Contact[]          @relation("ContactRequester")
+  contactsReceived   Contact[]          @relation("ContactReceiver")
+  transactionsMade   Transaction[]      @relation("TransactionCreator")
+
+  @@map("users")
+}
+
+model Account {
+  id           String      @id @default(uuid())
+  type         AccountType
+  name         String
+  ownerUserId  String?     @map("owner_user_id")
+  owner        User?       @relation("AccountOwner", fields: [ownerUserId], references: [id])
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  memberships       GroupMembership[]
+  goals             Goal[]
+  transactionsFrom  Transaction[] @relation("TransactionFrom")
+  transactionsTo    Transaction[] @relation("TransactionTo")
+
+  @@map("accounts")
+}
+
+model GroupMembership {
+  id          String    @id @default(uuid())
+  accountId   String    @map("account_id")
+  account     Account   @relation(fields: [accountId], references: [id])
+  userId      String    @map("user_id")
+  user        User      @relation(fields: [userId], references: [id])
+  roleInGroup GroupRole @default(member) @map("role_in_group")
+  joinedAt    DateTime  @default(now()) @map("joined_at")
+
+  @@unique([accountId, userId])
+  @@map("group_memberships")
+}
+
+model Contact {
+  id         String        @id @default(uuid())
+  userIdA    String        @map("user_id_a")
+  userA      User          @relation("ContactRequester", fields: [userIdA], references: [id])
+  userIdB    String        @map("user_id_b")
+  userB      User          @relation("ContactReceiver", fields: [userIdB], references: [id])
+  status     ContactStatus @default(pending)
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  @@unique([userIdA, userIdB])
+  @@map("contacts")
+}
+
+model Invite {
+  id          String     @id @default(uuid())
+  type        InviteType
+  targetId    String     @map("target_id")
+  code        String     @unique
+  createdBy   String     @map("created_by")
+  creator     User       @relation("InviteCreator", fields: [createdBy], references: [id])
+  expiresAt   DateTime   @map("expires_at")
+  usedBy      String?    @map("used_by")
+  redeemer    User?      @relation("InviteRedeemer", fields: [usedBy], references: [id])
+  usedAt      DateTime?  @map("used_at")
+  revokedAt   DateTime?  @map("revoked_at")
+  createdAt   DateTime   @default(now()) @map("created_at")
+
+  @@map("invites")
+}
+
+model Category {
+  id           String   @id @default(uuid())
+  name         String
+  isDefault    Boolean  @default(false) @map("is_default")
+  ownerUserId  String?  @map("owner_user_id")
+  owner        User?    @relation(fields: [ownerUserId], references: [id])
+
+  transactions Transaction[]
+
+  @@map("categories")
+}
+
+model Transaction {
+  id             String          @id @default(uuid())
+  type           TransactionType
+  fromAccountId  String?         @map("from_account_id")
+  fromAccount    Account?        @relation("TransactionFrom", fields: [fromAccountId], references: [id])
+  toAccountId    String?         @map("to_account_id")
+  toAccount      Account?        @relation("TransactionTo", fields: [toAccountId], references: [id])
+  amount         Decimal         @db.Decimal(12, 2)
+  categoryId     String?         @map("category_id")
+  category       Category?       @relation(fields: [categoryId], references: [id])
+  concept        String
+  createdBy      String          @map("created_by")
+  creator        User            @relation("TransactionCreator", fields: [createdBy], references: [id])
+  occurredAt     DateTime        @default(now()) @map("occurred_at")
+
+  @@map("transactions")
+}
+
+model Goal {
+  id                 String   @id @default(uuid())
+  accountId          String   @map("account_id")
+  account            Account  @relation(fields: [accountId], references: [id])
+  name               String
+  targetAmount       Decimal  @db.Decimal(12, 2) @map("target_amount")
+  currentAmount      Decimal  @default(0) @db.Decimal(12, 2) @map("current_amount")
+  monthlyContribution Decimal @db.Decimal(12, 2) @map("monthly_contribution")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  @@map("goals")
+}
