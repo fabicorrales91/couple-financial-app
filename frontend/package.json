@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "start": "serve -s dist -l ${PORT:-4173}",
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
@@ -22,7 +23,8 @@
     "lucide-react": "^0.445.0",
     "@radix-ui/react-dialog": "^1.1.1",
     "@radix-ui/react-label": "^2.1.0",
-    "@radix-ui/react-tabs": "^1.1.0"
+    "@radix-ui/react-tabs": "^1.1.0",
+    "serve": "^14.2.3"
   },
   "devDependencies": {
     "@types/node": "^20.14.10",
