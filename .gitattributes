@@ -1,0 +1,15 @@
+# Fuerza LF en todos los archivos de texto, sin importar la configuracion
+# local de autocrlf de cada maquina (Windows suele traer core.autocrlf=true,
+# lo que hace que git marque como "modified" TODO archivo con LF aunque el
+# contenido sea identico). Esto deja el comportamiento fijo para todo el equipo.
+* text=auto eol=lf
+
+# Binarios: nunca tocar finales de linea.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.svg binary
+*.ico binary
+*.woff binary
+*.woff2 binary
