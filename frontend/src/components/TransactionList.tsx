@@ -41,11 +41,15 @@ export function TransactionList({
 
   return (
     <ul className="divide-y divide-border">
-      {transactions.map((tx) => {
+      {transactions.map((tx, index) => {
         const sign = signFor(tx, accountId);
         const Icon = getTransactionIcon(tx.category?.name, tx.type);
         return (
-          <li key={tx.id} className="flex items-center gap-3 py-3">
+          <li
+            key={tx.id}
+            className="flex animate-fade-slide-in items-center gap-3 py-3"
+            style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
+          >
             <span
               className={cn(
                 "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",

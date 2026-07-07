@@ -1,3 +1,5 @@
+import * as React from "react";
+
 const DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 function RollingDigit({ digit }: { digit: number }) {
@@ -70,5 +72,55 @@ export function RollingNumber({
         );
       })}
     </span>
+  );
+}
+
+/**
+ * Envuelve a RollingNumber para que, la PRIMERA vez que se monta (justo
+ * despues del skeleton de carga inicial), arranque en 0 y suba animado hasta
+ * el valor real, como si estuviera "sumando" el dinero. Los refrescos
+ * posteriores (sync manual, nueva transaccion) NO vuelven a arrancar en 0:
+ * simplemente pasan el valor nuevo a RollingNumber, que ya anima la
+ * transicion entre el valor viejo y el nuevo por su cuenta. Sin esto, cada
+ * refresco reiniciaria la cuenta desde 0, lo cual se ve mal para cambios
+ * chicos (ej. sumar una transaccion de 12 EUR no deberia reiniciar el
+ * contador completo del saldo).
+ */
+export function CountUpNumber({
+  value,
+  formatOptions,
+  locale = "es-ES",
+  className,
+}: {
+  value: number;
+  formatOptions?: Intl.NumberFormatOptions;
+  locale?: string;
+  className?: string;
+}) {
+  const [displayValue, setDisplayValue] = React.useState(0);
+  const hasMountedRef = React.useRef(false);
+
+  React.useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      let raf2 = 0;
+      const raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => setDisplayValue(value));
+      });
+      return () => {
+        cancelAnimationFrame(raf1);
+        cancelAnimationFrame(raf2);
+      };
+    }
+    setDisplayValue(value);
+  }, [value]);
+
+  return (
+    <RollingNumber
+      value={displayValue}
+      formatOptions={formatOptions}
+      locale={locale}
+      className={className}
+    />
   );
 }

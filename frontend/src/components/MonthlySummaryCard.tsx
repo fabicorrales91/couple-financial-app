@@ -3,7 +3,8 @@ import { TrendingUp, TrendingDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
 import { Button } from "./ui/button";
 import { Alert } from "./ui/alert";
-import { RollingNumber } from "./ui/rolling-number";
+import { CountUpNumber } from "./ui/rolling-number";
+import { SummaryContentSkeleton } from "./DashboardSkeleton";
 import { getTransactionIcon } from "../lib/category-icons";
 import { cn } from "../lib/utils";
 import { api, ApiError } from "../lib/api";
@@ -36,6 +37,35 @@ function formatMonthTitle(label: string) {
 }
 
 const EUR = { style: "currency", currency: "EUR" } as const;
+
+/**
+ * Barra de progreso de una categoria: arranca en 0% y anima hacia su ancho
+ * real cada vez que se monta (cada carga/refresco de este bloque), dando el
+ * efecto de "rellenando la barra" pedido para el estado de carga.
+ */
+function AnimatedBar({ targetPercent, colorClassName }: { targetPercent: number; colorClassName: string }) {
+  const [percent, setPercent] = React.useState(0);
+
+  React.useEffect(() => {
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setPercent(targetPercent));
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
+  }, [targetPercent]);
+
+  return (
+    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+      <div
+        className={`h-full rounded-full transition-all duration-500 ease-out ${colorClassName}`}
+        style={{ width: `${percent}%` }}
+      />
+    </div>
+  );
+}
 
 export function MonthlySummaryCard({
   accountId,
@@ -110,14 +140,14 @@ export function MonthlySummaryCard({
         {error && <Alert variant="destructive">{error}</Alert>}
 
         {loading ? (
-          <p className="text-sm text-muted-foreground">Cargando...</p>
+          <SummaryContentSkeleton />
         ) : summary ? (
           <>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-xs text-muted-foreground">Gastos</p>
                 <p className="text-xl font-semibold text-destructive">
-                  <RollingNumber value={totalGasto} formatOptions={EUR} />
+                  <CountUpNumber value={totalGasto} formatOptions={EUR} />
                 </p>
                 {deltaPct !== null && (
                   <p
@@ -139,7 +169,7 @@ export function MonthlySummaryCard({
               <div>
                 <p className="text-xs text-muted-foreground">Ingresos</p>
                 <p className="text-xl font-semibold text-secondary">
-                  <RollingNumber value={totalIngreso} formatOptions={EUR} />
+                  <CountUpNumber value={totalIngreso} formatOptions={EUR} />
                 </p>
               </div>
             </div>
@@ -156,6 +186,7 @@ export function MonthlySummaryCard({
                   const iconTint = CATEGORY_ICON_TINTS[index % CATEGORY_ICON_TINTS.length];
                   const Icon = getTransactionIcon(c.categoryName, "gasto");
                   const total = Number(c.total);
+                  const targetPercent = maxCategoryTotal > 0 ? (total / maxCategoryTotal) * 100 : 0;
                   return (
                     <button
                       key={filterValue}
@@ -182,17 +213,10 @@ export function MonthlySummaryCard({
                         <div className="flex justify-between text-sm">
                           <span className="truncate">{c.categoryName}</span>
                           <span className="font-medium">
-                            <RollingNumber value={total} formatOptions={EUR} />
+                            <CountUpNumber value={total} formatOptions={EUR} />
                           </span>
                         </div>
-                        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-                          <div
-                            className={`h-full rounded-full transition-all duration-500 ease-out ${barColor}`}
-                            style={{
-                              width: `${maxCategoryTotal > 0 ? (total / maxCategoryTotal) * 100 : 0}%`,
-                            }}
-                          />
-                        </div>
+                        <AnimatedBar targetPercent={targetPercent} colorClassName={barColor} />
                       </div>
                     </button>
                   );

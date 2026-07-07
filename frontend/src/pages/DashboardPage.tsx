@@ -9,16 +9,13 @@ import { TransactionList } from "../components/TransactionList";
 import { NewTransactionDialog } from "../components/NewTransactionDialog";
 import { GroupsAndInvitesSection } from "../components/GroupsAndInvitesSection";
 import { MonthlySummaryCard } from "../components/MonthlySummaryCard";
-import { RollingNumber } from "../components/ui/rolling-number";
+import { DashboardSkeleton } from "../components/DashboardSkeleton";
+import { CountUpNumber } from "../components/ui/rolling-number";
 import { Button } from "../components/ui/button";
 import { Alert } from "../components/ui/alert";
 import { Card, CardContent, CardHeader } from "../components/ui/card";
 
 const EUR = { style: "currency", currency: "EUR" } as const;
-
-function formatMoney(value: number) {
-  return value.toLocaleString("es-ES", EUR);
-}
 
 export function DashboardPage() {
   const { logout } = useAuth();
@@ -156,7 +153,7 @@ export function DashboardPage() {
         )}
 
         {loading ? (
-          <p className="text-sm text-muted-foreground">Cargando...</p>
+          <DashboardSkeleton />
         ) : (
           <>
             <section className="rounded-lg bg-primary p-6 text-primary-foreground">
@@ -164,14 +161,14 @@ export function DashboardPage() {
                 {selectedAccount ? selectedAccount.name : "Balance"}
               </p>
               <p className="mb-1 text-3xl font-bold">
-                <RollingNumber
+                <CountUpNumber
                   value={selectedAccount ? Number(selectedAccount.balance) : 0}
                   formatOptions={EUR}
                 />
               </p>
               {accounts.length > 1 && (
                 <p className="mb-4 text-xs opacity-70">
-                  Total combinado: {formatMoney(combinedBalance)}
+                  Total combinado: <CountUpNumber value={combinedBalance} formatOptions={EUR} />
                 </p>
               )}
               <div className={cn("flex flex-wrap gap-2", accounts.length <= 1 && "mt-4")}>
