@@ -1,5 +1,5 @@
 import * as React from "react";
-import { RefreshCw, Download } from "lucide-react";
+import { RefreshCw, Download, Trash2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { api, ApiError } from "../lib/api";
 import { checkForAppUpdate } from "../lib/reload-app";
@@ -8,6 +8,7 @@ import type { Account, Category, Transaction } from "../lib/types";
 import { TransactionList } from "../components/TransactionList";
 import { NewTransactionDialog } from "../components/NewTransactionDialog";
 import { NewAccountDialog } from "../components/NewAccountDialog";
+import { DeleteAccountDialog } from "../components/DeleteAccountDialog";
 import { GroupsAndInvitesSection } from "../components/GroupsAndInvitesSection";
 import { MonthlySummaryCard } from "../components/MonthlySummaryCard";
 import { DashboardSkeleton } from "../components/DashboardSkeleton";
@@ -28,6 +29,7 @@ export function DashboardPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [summaryRefreshToken, setSummaryRefreshToken] = React.useState(0);
+  const [deletingAccount, setDeletingAccount] = React.useState<Account | null>(null);
   const [categoryFilter, setCategoryFilter] = React.useState<{
     id: "none" | string;
     name: string;
@@ -190,9 +192,21 @@ export function DashboardPage() {
         ) : (
           <>
             <section className="rounded-lg bg-primary p-6 text-primary-foreground">
-              <p className="text-sm opacity-85">
-                {selectedAccount ? selectedAccount.name : "Balance"}
-              </p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm opacity-85">
+                  {selectedAccount ? selectedAccount.name : "Balance"}
+                </p>
+                {selectedAccount?.isOwn && selectedAccount.type === "personal" && accounts.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setDeletingAccount(selectedAccount)}
+                    className="rounded-full p-1 text-primary-foreground/70 transition-colors hover:bg-primary-foreground/20 hover:text-primary-foreground"
+                    aria-label="Eliminar cuenta"
+                  >
+                    <Trash2 className="h-4 w-4" strokeWidth={2} />
+                  </button>
+                )}
+              </div>
               <p className="mb-1 text-3xl font-bold">
                 <CountUpNumber
                   value={selectedAccount ? Number(selectedAccount.balance) : 0}
@@ -307,6 +321,20 @@ export function DashboardPage() {
           </>
         )}
       </main>
+
+      <DeleteAccountDialog
+        account={deletingAccount}
+        onClose={() => setDeletingAccount(null)}
+        onDeleted={(accountId) => {
+          setAccounts((prev) => {
+            const next = prev.filter((a) => a.id !== accountId);
+            setSelectedAccountId((current) =>
+              current === accountId ? next[0]?.id ?? null : current
+            );
+            return next;
+          });
+        }}
+      />
     </div>
   );
 }

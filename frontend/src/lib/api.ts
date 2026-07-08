@@ -104,5 +104,6 @@ export const api = {
       method: "PATCH",
       body: data !== undefined ? JSON.stringify(data) : undefined,
     }),
+  delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
   download: downloadFile,
 };

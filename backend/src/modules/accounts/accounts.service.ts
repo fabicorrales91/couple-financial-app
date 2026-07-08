@@ -54,6 +54,50 @@ export async function createPersonalAccount(
   });
 }
 
+/**
+ * Elimina una cuenta PERSONAL propia (no cuentas de grupo: esas las comparten
+ * otros miembros y borrarlas es una decision distinta, no cubierta aca).
+ *
+ * Reglas duras, no negociables para una app financiera:
+ * - Si la cuenta tiene movimientos (como origen o destino), NO se borra.
+ *   El modelo tiene ON DELETE SET NULL en Transaction.fromAccountId/
+ *   toAccountId: borrar la cuenta dejaria movimientos historicos con
+ *   origen/destino en null, rompiendo el extracto y los saldos ya
+ *   calculados. Mejor bloquear con un mensaje claro que corromper datos.
+ * - No se puede borrar la unica cuenta propia del usuario: la app requiere
+ *   al menos una cuenta personal para funcionar.
+ */
+export async function deleteAccount(userId: string, accountId: string) {
+  const account = await prisma.account.findUnique({ where: { id: accountId } });
+
+  if (!account) {
+    throw HttpError.notFound("Cuenta no encontrada");
+  }
+
+  if (account.type !== "personal" || account.ownerUserId !== userId) {
+    throw HttpError.forbidden("Solo puedes eliminar tus propias cuentas personales");
+  }
+
+  const [movementCount, ownedAccountCount] = await Promise.all([
+    prisma.transaction.count({
+      where: { OR: [{ fromAccountId: accountId }, { toAccountId: accountId }] },
+    }),
+    prisma.account.count({ where: { ownerUserId: userId } }),
+  ]);
+
+  if (movementCount > 0) {
+    throw HttpError.conflict(
+      "Esta cuenta tiene movimientos registrados y no se puede eliminar, para no perder el historial. Si ya no la usas, simplemente dejala de lado."
+    );
+  }
+
+  if (ownedAccountCount <= 1) {
+    throw HttpError.conflict("No puedes eliminar tu unica cuenta");
+  }
+
+  await prisma.account.delete({ where: { id: accountId } });
+}
+
 export async function getAccountBalance(accountId: string): Promise<string> {
   const [incoming, outgoing] = await Promise.all([
     prisma.transaction.aggregate({
