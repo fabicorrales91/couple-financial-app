@@ -65,8 +65,7 @@ export function NewAccountDialog({ onCreated }: { onCreated: (account: Account) 
       <Button
         type="button"
         variant="outline"
-        size="sm"
-        className="h-7 w-7 shrink-0 rounded-full border-primary-foreground/40 bg-transparent p-0 text-primary-foreground hover:bg-primary-foreground/20"
+        className="h-11 w-11 shrink-0 rounded-full border-primary-foreground/40 bg-transparent p-0 text-primary-foreground hover:bg-primary-foreground/20 active:bg-primary-foreground/30"
         aria-label="Nueva cuenta"
         onClick={() => setOpen(true)}
       >
@@ -95,7 +94,7 @@ export function NewAccountDialog({ onCreated }: { onCreated: (account: Account) 
             <Label htmlFor="accountCurrency">Moneda</Label>
             <select
               id="accountCurrency"
-              className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-base"
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
             >

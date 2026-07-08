@@ -61,7 +61,7 @@ export function TransactionList({
               <button
                 type="button"
                 onClick={() => setEditingTx(tx)}
-                className="-mx-1 flex w-full items-center gap-3 rounded-md px-1 py-3 text-left transition-colors hover:bg-accent"
+                className="-mx-1 flex w-full items-center gap-3 rounded-md px-1 py-3 text-left transition-colors hover:bg-accent active:bg-accent"
               >
                 <span
                   className={cn(

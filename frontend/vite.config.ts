@@ -12,8 +12,8 @@ export default defineConfig({
         name: "App Financiera",
         short_name: "AppFinanciera",
         description: "Registro y analisis de gastos personales y del hogar",
-        theme_color: "#0f172a",
-        background_color: "#ffffff",
+        theme_color: "#9c4236",
+        background_color: "#fdf4f1",
         display: "standalone",
         start_url: "/",
         icons: [

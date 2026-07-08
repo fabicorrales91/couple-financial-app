@@ -137,13 +137,15 @@ export function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
+      <header
+        className="border-b border-border bg-card"
+        style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+      >
         <div className="mx-auto flex max-w-5xl items-center justify-between p-4">
           <h1 className="text-lg font-semibold">App Financiera</h1>
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
-              size="sm"
               aria-label="Exportar movimientos"
               disabled={exporting || !selectedAccountId}
               onClick={() => void exportTransactions()}
@@ -152,7 +154,6 @@ export function DashboardPage() {
             </Button>
             <Button
               variant="ghost"
-              size="sm"
               aria-label="Sincronizar datos"
               disabled={reloading}
               onClick={() => void refreshData()}
@@ -200,7 +201,7 @@ export function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setDeletingAccount(selectedAccount)}
-                    className="rounded-full p-1 text-primary-foreground/70 transition-colors hover:bg-primary-foreground/20 hover:text-primary-foreground"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-primary-foreground/70 transition-colors hover:bg-primary-foreground/20 hover:text-primary-foreground active:bg-primary-foreground/30"
                     aria-label="Eliminar cuenta"
                   >
                     <Trash2 className="h-4 w-4" strokeWidth={2} />
@@ -228,7 +229,9 @@ export function DashboardPage() {
                     type="button"
                     onClick={() => setSelectedAccountId(account.id)}
                     className={cn(
-                      "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+                      // min-h-11 (44px): area tactil accesible sin agrandar
+                      // visualmente el chip (el texto queda centrado adentro).
+                      "inline-flex min-h-11 items-center rounded-full px-4 py-1.5 text-xs font-semibold transition-colors active:scale-[0.97]",
                       account.id === selectedAccountId
                         ? "bg-primary-foreground text-primary"
                         : "bg-primary-foreground/20 hover:bg-primary-foreground/30"
@@ -274,7 +277,7 @@ export function DashboardPage() {
                           <button
                             type="button"
                             onClick={() => setCategoryFilter(null)}
-                            className="ml-1 hover:text-foreground"
+                            className="-mr-1 ml-0.5 flex h-6 w-6 items-center justify-center rounded-full text-base leading-none hover:bg-black/10 hover:text-foreground"
                             aria-label="Quitar filtro"
                           >
                             ×

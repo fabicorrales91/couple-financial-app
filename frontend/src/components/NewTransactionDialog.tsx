@@ -99,7 +99,7 @@ export function NewTransactionDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          className="fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full p-0 shadow-[0_10px_24px_rgba(156,66,54,0.35)]"
+          className="fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full p-0 shadow-[0_10px_24px_rgba(156,66,54,0.35)] transition-transform active:scale-95"
           style={{
             // Base garantizada: bottom-6/right-6 (clases Tailwind). El safe-area se
             // suma como margen ADITIVO, nunca reemplaza el offset: si env() no
@@ -149,7 +149,7 @@ export function NewTransactionDialog({
             <Label htmlFor="categoryId">Categoria</Label>
             <select
               id="categoryId"
-              className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-base"
               {...register("categoryId")}
             >
               <option value="">Sin categoria</option>
@@ -166,7 +166,7 @@ export function NewTransactionDialog({
               <Label htmlFor="otherAccountId">Cuenta destino</Label>
               <select
                 id="otherAccountId"
-                className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm"
+                className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-base"
                 {...register("otherAccountId")}
               >
                 <option value="">Selecciona una cuenta</option>

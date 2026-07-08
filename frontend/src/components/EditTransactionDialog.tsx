@@ -107,7 +107,7 @@ export function EditTransactionDialog({
             <Label htmlFor="editCategoryId">Categoria</Label>
             <select
               id="editCategoryId"
-              className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-base"
               {...register("categoryId")}
             >
               <option value="">Sin categoria</option>

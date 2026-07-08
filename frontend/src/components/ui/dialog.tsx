@@ -15,7 +15,12 @@ export const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-card p-6 shadow-lg",
+        // max-h + overflow-y-auto: en un telefono chico, con el teclado
+        // ocupando hasta la mitad de la pantalla, un formulario largo (ej.
+        // nuevo movimiento con todos sus campos) puede superar el viewport
+        // disponible. Sin esto, el boton de guardar queda fuera de la
+        // pantalla y sin forma de hacer scroll para llegar a el.
+        "fixed left-1/2 top-1/2 z-50 max-h-[85vh] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border border-border bg-card p-6 shadow-lg",
         className
       )}
       {...props}

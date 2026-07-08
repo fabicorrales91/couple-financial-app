@@ -30,6 +30,14 @@
   * {
     @apply border-border;
   }
+  html {
+    /* Evita que el gesto de pull-to-refresh nativo del navegador (Chrome
+       Android sobre todo) dispare una recarga completa de la pagina al
+       scrollear hacia arriba desde el tope: compite directamente con el
+       boton de sincronizar, que se construyo especificamente para refrescar
+       datos SIN recargar la app. */
+    overscroll-behavior-y: contain;
+  }
   body {
     @apply bg-background text-foreground;
   }
