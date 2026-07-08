@@ -30,6 +30,7 @@ export async function createTransaction(
       amount: input.amount,
       categoryId: input.categoryId ?? null,
       concept: input.concept,
+      isRemesa: input.isRemesa ?? false,
       createdBy: userId,
       occurredAt: input.occurredAt ?? new Date(),
     },
@@ -62,6 +63,68 @@ export async function listTransactionsForAccount(
     take: limit,
     include: { category: true },
   });
+}
+
+/**
+ * Trae TODO el historial de una cuenta (sin limite de paginacion), para
+ * exportar. A diferencia de listTransactionsForAccount, orden cronologico
+ * ascendente (lectura natural de un extracto) e incluye el nombre de las
+ * cuentas origen/destino para que el archivo tenga sentido por si solo, sin
+ * tener que cruzar IDs con otra pantalla.
+ */
+export async function listAllTransactionsForExport(userId: string, accountId: string) {
+  await assertAccountAccessible(userId, accountId);
+
+  return prisma.transaction.findMany({
+    where: {
+      OR: [{ fromAccountId: accountId }, { toAccountId: accountId }],
+    },
+    orderBy: { occurredAt: "asc" },
+    include: {
+      category: true,
+      fromAccount: { select: { name: true } },
+      toAccount: { select: { name: true } },
+    },
+  });
+}
+
+function csvEscape(value: string): string {
+  if (/[",\n]/.test(value)) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
+}
+
+type ExportableTransaction = Awaited<ReturnType<typeof listAllTransactionsForExport>>[number];
+
+/**
+ * Genera el CSV del extracto de una cuenta. El signo del monto es relativo a
+ * la cuenta exportada (igual que en la lista de movimientos de la app), no
+ * el monto crudo de la fila, para que el archivo se lea igual que la pantalla.
+ * Incluye BOM UTF-8 al inicio porque Excel en Windows, sin eso, interpreta
+ * mal los acentos.
+ */
+export function buildTransactionsCsv(transactions: ExportableTransaction[], accountId: string): string {
+  const header = ["Fecha", "Tipo", "Concepto", "Categoria", "Cuenta origen", "Cuenta destino", "Monto", "Remesa"];
+  const rows = transactions.map((tx) => {
+    const sign = tx.toAccountId === accountId ? "" : tx.fromAccountId === accountId ? "-" : "";
+    const amount = `${sign}${tx.amount.toFixed(2)}`;
+    return [
+      tx.occurredAt.toISOString().slice(0, 10),
+      tx.type,
+      tx.concept,
+      tx.category?.name ?? "Sin categoria",
+      tx.fromAccount?.name ?? "",
+      tx.toAccount?.name ?? "",
+      amount,
+      tx.isRemesa ? "Si" : "No",
+    ]
+      .map((field) => csvEscape(String(field)))
+      .join(",");
+  });
+
+  const BOM = "﻿";
+  return BOM + [header.join(","), ...rows].join("\n") + "\n";
 }
 
 function parseMonthLabel(label: string): { year: number; monthIndex: number } {

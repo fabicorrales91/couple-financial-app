@@ -23,6 +23,7 @@ const schema = z.object({
   concept: z.string().min(1, "Requerido").max(200),
   categoryId: z.string().optional(),
   otherAccountId: z.string().optional(),
+  isRemesa: z.boolean().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -58,6 +59,7 @@ export function NewTransactionDialog({
         amount: values.amount,
         concept: values.concept,
         categoryId: values.categoryId || undefined,
+        isRemesa: values.isRemesa ?? false,
       };
 
       if (type === "gasto") {
@@ -180,6 +182,21 @@ export function NewTransactionDialog({
               </p>
             </div>
           )}
+
+          <div className="flex items-start gap-2">
+            <input
+              id="isRemesa"
+              type="checkbox"
+              className="mt-1 h-4 w-4 rounded border-input"
+              {...register("isRemesa")}
+            />
+            <Label htmlFor="isRemesa" className="font-normal leading-tight">
+              Es una remesa
+              <span className="block text-xs font-normal text-muted-foreground">
+                Envio o recepcion de dinero entre paises o monedas
+              </span>
+            </Label>
+          </div>
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? "Guardando..." : "Guardar"}

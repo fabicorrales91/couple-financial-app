@@ -61,6 +61,7 @@ model Account {
   id           String      @id @default(uuid())
   type         AccountType
   name         String
+  currency     String      @default("EUR") @db.VarChar(3)
   ownerUserId  String?     @map("owner_user_id")
   owner        User?       @relation("AccountOwner", fields: [ownerUserId], references: [id])
   createdAt    DateTime    @default(now()) @map("created_at")
@@ -139,6 +140,7 @@ model Transaction {
   categoryId     String?         @map("category_id")
   category       Category?       @relation(fields: [categoryId], references: [id])
   concept        String
+  isRemesa       Boolean         @default(false) @map("is_remesa")
   createdBy      String          @map("created_by")
   creator        User            @relation("TransactionCreator", fields: [createdBy], references: [id])
   occurredAt     DateTime        @default(now()) @map("occurred_at")
@@ -153,8 +155,4 @@ model Goal {
   name               String
   targetAmount       Decimal  @db.Decimal(12, 2) @map("target_amount")
   currentAmount      Decimal  @default(0) @db.Decimal(12, 2) @map("current_amount")
-  monthlyContribution Decimal @db.Decimal(12, 2) @map("monthly_contribution")
-  createdAt          DateTime @default(now()) @map("created_at")
-
-  @@map("goals")
-}
+  monthlyContribution Decimal @db.Deci

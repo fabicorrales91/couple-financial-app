@@ -22,6 +22,7 @@ export async function getMyAccounts(userId: string) {
       id: account.id,
       type: account.type,
       name: account.name,
+      currency: account.currency,
       isOwn: account.ownerUserId === userId,
       roleInGroup:
         account.memberships.find((m) => m.userId === userId)?.roleInGroup ??
@@ -31,6 +32,26 @@ export async function getMyAccounts(userId: string) {
   );
 
   return withBalances;
+}
+
+/**
+ * Crea una cuenta personal adicional para el usuario (ej: una cuenta en COP
+ * para seguimiento de ahorros/familia en Colombia, separada de la cuenta
+ * principal en EUR). No requiere invitacion ni grupo, es exclusivamente suya.
+ */
+export async function createPersonalAccount(
+  userId: string,
+  name: string,
+  currency: string
+) {
+  return prisma.account.create({
+    data: {
+      type: "personal",
+      name,
+      currency,
+      ownerUserId: userId,
+    },
+  });
 }
 
 export async function getAccountBalance(accountId: string): Promise<string> {

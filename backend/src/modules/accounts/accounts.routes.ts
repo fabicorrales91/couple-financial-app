@@ -2,7 +2,8 @@ import { Router } from "express";
 import { asyncHandler } from "../../lib/async-handler";
 import { requireAuth } from "../../middleware/auth";
 import { HttpError } from "../../lib/http-error";
-import { getMyAccounts } from "./accounts.service";
+import { createAccountSchema } from "./accounts.schemas";
+import { getMyAccounts, createPersonalAccount } from "./accounts.service";
 
 export const accountsRouter = Router();
 
@@ -14,5 +15,15 @@ accountsRouter.get(
     if (!req.auth) throw HttpError.unauthorized();
     const accounts = await getMyAccounts(req.auth.userId);
     res.json({ accounts });
+  })
+);
+
+accountsRouter.post(
+  "/",
+  asyncHandler(async (req, res) => {
+    if (!req.auth) throw HttpError.unauthorized();
+    const body = createAccountSchema.parse(req.body);
+    const account = await createPersonalAccount(req.auth.userId, body.name, body.currency);
+    res.status(201).json({ account });
   })
 );

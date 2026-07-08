@@ -6,6 +6,7 @@ export interface Account {
   id: string;
   type: AccountType;
   name: string;
+  currency: string;
   isOwn: boolean;
   roleInGroup: GroupRole | null;
   balance: string;
@@ -23,6 +24,7 @@ export interface Transaction {
   toAccountId: string | null;
   amount: string;
   concept: string;
+  isRemesa: boolean;
   occurredAt: string;
   category: Category | null;
 }

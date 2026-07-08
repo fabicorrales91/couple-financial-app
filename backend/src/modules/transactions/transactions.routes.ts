@@ -6,11 +6,14 @@ import {
   createTransactionSchema,
   listTransactionsSchema,
   monthlySummarySchema,
+  exportTransactionsSchema,
 } from "./transactions.schemas";
 import {
   createTransaction,
   listTransactionsForAccount,
   getMonthlySummary,
+  listAllTransactionsForExport,
+  buildTransactionsCsv,
 } from "./transactions.service";
 
 export const transactionsRouter = Router();
@@ -49,5 +52,18 @@ transactionsRouter.get(
     const query = monthlySummarySchema.parse(req.query);
     const summary = await getMonthlySummary(req.auth.userId, query.accountId, query.month);
     res.json({ summary });
+  })
+);
+
+transactionsRouter.get(
+  "/export",
+  asyncHandler(async (req, res) => {
+    if (!req.auth) throw HttpError.unauthorized();
+    const query = exportTransactionsSchema.parse(req.query);
+    const transactions = await listAllTransactionsForExport(req.auth.userId, query.accountId);
+    const csv = buildTransactionsCsv(transactions, query.accountId);
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", 'attachment; filename="movimientos.csv"');
+    res.send(csv);
   })
 );

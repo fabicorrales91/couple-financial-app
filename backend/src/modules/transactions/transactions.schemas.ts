@@ -5,6 +5,10 @@ const baseFields = {
   categoryId: z.string().uuid().optional(),
   concept: z.string().min(1).max(200),
   occurredAt: z.coerce.date().optional(),
+  // Marca envio/recepcion de dinero entre paises o monedas (remesa). No
+  // implica necesariamente una transferencia interna entre cuentas propias:
+  // tambien aplica a un gasto (envio via un tercero) o un ingreso (recepcion).
+  isRemesa: z.boolean().optional().default(false),
 };
 
 export const createTransactionSchema = z
@@ -47,4 +51,8 @@ export const monthlySummarySchema = z.object({
     .string()
     .regex(/^\d{4}-\d{2}$/, "Formato esperado: YYYY-MM")
     .optional(),
+});
+
+export const exportTransactionsSchema = z.object({
+  accountId: z.string().uuid(),
 });

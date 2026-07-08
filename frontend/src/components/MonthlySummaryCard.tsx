@@ -6,6 +6,7 @@ import { Alert } from "./ui/alert";
 import { CountUpNumber } from "./ui/rolling-number";
 import { SummaryContentSkeleton } from "./DashboardSkeleton";
 import { getTransactionIcon } from "../lib/category-icons";
+import { formatOptionsFor } from "../lib/currency";
 import { cn } from "../lib/utils";
 import { api, ApiError } from "../lib/api";
 import type { MonthlySummary } from "../lib/types";
@@ -35,8 +36,6 @@ function formatMonthTitle(label: string) {
   const text = date.toLocaleDateString("es-ES", { month: "long", year: "numeric", timeZone: "UTC" });
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
-
-const EUR = { style: "currency", currency: "EUR" } as const;
 
 /**
  * Barra de progreso de una categoria: arranca en 0% y anima hacia su ancho
@@ -69,16 +68,19 @@ function AnimatedBar({ targetPercent, colorClassName }: { targetPercent: number;
 
 export function MonthlySummaryCard({
   accountId,
+  accountCurrency,
   refreshToken,
   activeFilter,
   onSelectCategory,
 }: {
   accountId: string;
+  accountCurrency: string;
   refreshToken?: number;
   /** "none" | uuid de la categoria activa, o null si no hay filtro. */
   activeFilter?: string | null;
   onSelectCategory?: (categoryId: "none" | string | null, categoryName: string) => void;
 }) {
+  const currencyFormat = formatOptionsFor(accountCurrency);
   const [month, setMonth] = React.useState(currentMonthLabel());
   const [summary, setSummary] = React.useState<MonthlySummary | null>(null);
   const [error, setError] = React.useState<string | null>(null);
@@ -147,7 +149,7 @@ export function MonthlySummaryCard({
               <div>
                 <p className="text-xs text-muted-foreground">Gastos</p>
                 <p className="text-xl font-semibold text-destructive">
-                  <CountUpNumber value={totalGasto} formatOptions={EUR} />
+                  <CountUpNumber value={totalGasto} formatOptions={currencyFormat} />
                 </p>
                 {deltaPct !== null && (
                   <p
@@ -169,7 +171,7 @@ export function MonthlySummaryCard({
               <div>
                 <p className="text-xs text-muted-foreground">Ingresos</p>
                 <p className="text-xl font-semibold text-secondary">
-                  <CountUpNumber value={totalIngreso} formatOptions={EUR} />
+                  <CountUpNumber value={totalIngreso} formatOptions={currencyFormat} />
                 </p>
               </div>
             </div>
@@ -213,7 +215,7 @@ export function MonthlySummaryCard({
                         <div className="flex justify-between text-sm">
                           <span className="truncate">{c.categoryName}</span>
                           <span className="font-medium">
-                            <CountUpNumber value={total} formatOptions={EUR} />
+                            <CountUpNumber value={total} formatOptions={currencyFormat} />
                           </span>
                         </div>
                         <AnimatedBar targetPercent={targetPercent} colorClassName={barColor} />

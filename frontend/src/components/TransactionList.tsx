@@ -1,10 +1,7 @@
 import type { Transaction } from "../lib/types";
 import { getTransactionIcon } from "../lib/category-icons";
+import { formatMoney } from "../lib/currency";
 import { cn } from "../lib/utils";
-
-function formatMoney(amount: string) {
-  return Number(amount).toLocaleString("es-ES", { style: "currency", currency: "EUR" });
-}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("es-ES", {
@@ -23,10 +20,12 @@ function signFor(tx: Transaction, accountId: string) {
 export function TransactionList({
   transactions,
   accountId,
+  accountCurrency,
   filtered = false,
 }: {
   transactions: Transaction[];
   accountId: string;
+  accountCurrency: string;
   filtered?: boolean;
 }) {
   if (transactions.length === 0) {
@@ -64,6 +63,7 @@ export function TransactionList({
                 {formatDate(tx.occurredAt)}
                 {tx.category ? ` · ${tx.category.name}` : ""}
                 {tx.type === "transferencia" ? " · Transferencia" : ""}
+                {tx.isRemesa ? " · Remesa" : ""}
               </p>
             </div>
             <span
@@ -73,7 +73,7 @@ export function TransactionList({
               )}
             >
               {sign}
-              {formatMoney(tx.amount)}
+              {formatMoney(tx.amount, accountCurrency)}
             </span>
           </li>
         );
