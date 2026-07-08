@@ -155,4 +155,8 @@ model Goal {
   name               String
   targetAmount       Decimal  @db.Decimal(12, 2) @map("target_amount")
   currentAmount      Decimal  @default(0) @db.Decimal(12, 2) @map("current_amount")
-  monthlyContribution Decimal @db.Deci
+  monthlyContribution Decimal @db.Decimal(12, 2) @map("monthly_contribution")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  @@map("goals")
+}
