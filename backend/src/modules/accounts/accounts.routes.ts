@@ -32,7 +32,9 @@ accountsRouter.delete(
   "/:id",
   asyncHandler(async (req, res) => {
     if (!req.auth) throw HttpError.unauthorized();
-    await deleteAccount(req.auth.userId, req.params.id);
+    const accountId = req.params.id;
+    if (!accountId) throw HttpError.badRequest("Falta el id de la cuenta");
+    await deleteAccount(req.auth.userId, accountId);
     res.status(204).send();
   })
 );

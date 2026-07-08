@@ -74,8 +74,10 @@ transactionsRouter.patch(
   "/:id",
   asyncHandler(async (req, res) => {
     if (!req.auth) throw HttpError.unauthorized();
+    const transactionId = req.params.id;
+    if (!transactionId) throw HttpError.badRequest("Falta el id del movimiento");
     const body = updateTransactionSchema.parse(req.body);
-    const transaction = await updateTransaction(req.auth.userId, req.params.id, body);
+    const transaction = await updateTransaction(req.auth.userId, transactionId, body);
     res.json({ transaction });
   })
 );
