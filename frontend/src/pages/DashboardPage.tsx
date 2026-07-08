@@ -273,7 +273,12 @@ export function DashboardPage() {
                       transactions={transactions}
                       accountId={selectedAccount.id}
                       accountCurrency={selectedAccount.currency}
+                      categories={categories}
                       filtered={Boolean(categoryFilter)}
+                      onUpdated={async () => {
+                        await loadTransactions(selectedAccount.id, categoryFilter?.id);
+                        setSummaryRefreshToken((n) => n + 1);
+                      }}
                     />
                   </CardContent>
                 </Card>

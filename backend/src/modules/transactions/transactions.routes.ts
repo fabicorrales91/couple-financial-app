@@ -7,6 +7,7 @@ import {
   listTransactionsSchema,
   monthlySummarySchema,
   exportTransactionsSchema,
+  updateTransactionSchema,
 } from "./transactions.schemas";
 import {
   createTransaction,
@@ -14,6 +15,7 @@ import {
   getMonthlySummary,
   listAllTransactionsForExport,
   buildTransactionsCsv,
+  updateTransaction,
 } from "./transactions.service";
 
 export const transactionsRouter = Router();
@@ -65,5 +67,15 @@ transactionsRouter.get(
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader("Content-Disposition", 'attachment; filename="movimientos.csv"');
     res.send(csv);
+  })
+);
+
+transactionsRouter.patch(
+  "/:id",
+  asyncHandler(async (req, res) => {
+    if (!req.auth) throw HttpError.unauthorized();
+    const body = updateTransactionSchema.parse(req.body);
+    const transaction = await updateTransaction(req.auth.userId, req.params.id, body);
+    res.json({ transaction });
   })
 );

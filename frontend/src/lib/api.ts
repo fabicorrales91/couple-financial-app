@@ -99,5 +99,10 @@ export const api = {
       method: "POST",
       body: data !== undefined ? JSON.stringify(data) : undefined,
     }),
+  patch: <T>(path: string, data?: unknown) =>
+    request<T>(path, {
+      method: "PATCH",
+      body: data !== undefined ? JSON.stringify(data) : undefined,
+    }),
   download: downloadFile,
 };

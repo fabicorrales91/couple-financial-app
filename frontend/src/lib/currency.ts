@@ -4,11 +4,21 @@
  * movimiento entre cuentas de distinta moneda guarda el monto tal cual, sin
  * ajustar por FX). Ver docs de la vault, seccion multi-moneda.
  */
-export function formatOptionsFor(currency: string): Intl.NumberFormatOptions {
-  return { style: "currency", currency };
+/**
+ * Si el backend todavia no manda `currency` (cliente de Prisma sin
+ * regenerar, migracion no aplicada, cache vieja, etc.) cae a EUR en vez de
+ * tirar RangeError y tumbar toda la pantalla: Intl.NumberFormat con
+ * currency=undefined rompe el render entero sin error boundary.
+ */
+export function formatOptionsFor(currency: string | null | undefined): Intl.NumberFormatOptions {
+  return { style: "currency", currency: currency || "EUR" };
 }
 
-export function formatMoney(amount: string | number, currency: string, locale = "es-ES") {
+export function formatMoney(
+  amount: string | number,
+  currency: string | null | undefined,
+  locale = "es-ES"
+) {
   return Number(amount).toLocaleString(locale, formatOptionsFor(currency));
 }
 

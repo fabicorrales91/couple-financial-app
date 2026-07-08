@@ -1,13 +1,15 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
+import { HttpError } from "../../lib/http-error";
 import {
   assertAccountAccessible,
   assertCanSendTo,
 } from "../accounts/accounts.service";
 import type { z } from "zod";
-import type { createTransactionSchema } from "./transactions.schemas";
+import type { createTransactionSchema, updateTransactionSchema } from "./transactions.schemas";
 
 type CreateTransactionInput = z.infer<typeof createTransactionSchema>;
+type UpdateTransactionInput = z.infer<typeof updateTransactionSchema>;
 
 export async function createTransaction(
   userId: string,
@@ -37,6 +39,43 @@ export async function createTransaction(
   });
 
   return transaction;
+}
+
+/**
+ * Edita monto, categoria y/o concepto de un movimiento ya registrado. No
+ * permite cambiar tipo ni cuentas origen/destino (eso equivale a borrar y
+ * crear uno nuevo, evita reglas de validacion cruzadas mas complejas).
+ * El acceso se valida contra la cuenta involucrada (origen o destino, la que
+ * exista), igual que el resto de operaciones sobre movimientos.
+ */
+export async function updateTransaction(
+  userId: string,
+  transactionId: string,
+  input: UpdateTransactionInput
+) {
+  const transaction = await prisma.transaction.findUnique({
+    where: { id: transactionId },
+  });
+
+  if (!transaction) {
+    throw HttpError.notFound("Movimiento no encontrado");
+  }
+
+  const accountId = transaction.fromAccountId ?? transaction.toAccountId;
+  if (!accountId) {
+    throw HttpError.notFound("Movimiento no encontrado");
+  }
+  await assertAccountAccessible(userId, accountId);
+
+  return prisma.transaction.update({
+    where: { id: transactionId },
+    data: {
+      ...(input.amount !== undefined ? { amount: input.amount } : {}),
+      ...(input.concept !== undefined ? { concept: input.concept } : {}),
+      ...(input.categoryId !== undefined ? { categoryId: input.categoryId } : {}),
+    },
+    include: { category: true },
+  });
 }
 
 export async function listTransactionsForAccount(

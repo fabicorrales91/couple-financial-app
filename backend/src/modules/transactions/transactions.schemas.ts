@@ -56,3 +56,10 @@ export const monthlySummarySchema = z.object({
 export const exportTransactionsSchema = z.object({
   accountId: z.string().uuid(),
 });
+
+export const updateTransactionSchema = z.object({
+  amount: z.number().positive().optional(),
+  // null limpia la categoria (queda "sin categoria"), undefined la deja igual.
+  categoryId: z.string().uuid().nullable().optional(),
+  concept: z.string().min(1).max(200).optional(),
+});
